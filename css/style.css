@@ -70,3 +70,19 @@ body {
   top: 15px;
   cursor: pointer;
 }
+
+#clientUpLoadButton {
+  position:fixed;
+  background-color: rgb(255,105,232);
+  border: none;
+  border-radius: 8px;
+  width: 150px;
+  height: 50px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  left: 705px;
+  top: 15px;
+  cursor: pointer;
+}

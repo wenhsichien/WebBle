@@ -19,15 +19,20 @@
         <div id="connection-panel">
             <button id="clientConnectButton" type="button" class="btn btn-default" onclick="connectionToggle()">连接 Connect</button>
 			<button id="clientDisplayButton" type="button" class="btn btn-default" onclick="TxEchoToggle()">开启输入显示 Echo On</button>
-			<button id="clientClrScreenButton" type="button" class="btn btn-default" onclick="ClrDisplay()">清除显示 Clear Display</button>			
+			<button id="clientClrScreenButton" type="button" class="btn btn-default" onclick="ClrDisplay()">清除显示 Clear Display</button>	
+			<button id="clientUpLoadButton" type="button" class="btn btn-default" onclick="UploadThingViewToggle()">ThingView - Off</button>	
         </div>
 
         <!-- <style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}} -->
         <!-- </style> -->
         <div id='terminal'></div>
+		
+		//<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
 
+		<script src='.js/jquery.min.js'></script>		
         <script src='./js/hterm_all.js'></script>
         <script src='./js/app.js'></script>
+        <script src='./js/thingview.js'></script>		
         
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-54344624-2"></script>

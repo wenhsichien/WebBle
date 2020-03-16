@@ -33,6 +33,9 @@ function ClrDisplay() {
 	window.term_.clearHome();
 	document.getElementById('terminal').focus();
 	initContent(window.term_.io);
+	
+	
+	updateThingView();
 }
 
 function connectionToggle() {
@@ -154,6 +157,9 @@ function handleNotifications(event) {
         str += String.fromCharCode(value.getUint8(i));
     }
     window.term_.io.print(str);
+	
+	if ( fUploadThingViewToggle )
+		updateThingView(str);
 }
 
 function nusSendString(s) {
