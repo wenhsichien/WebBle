@@ -24,15 +24,40 @@ function UploadThingViewToggle() {
 
 function updateThingView(str){
 	
-	let t= 160;
-	let i = 16.3;
+	// let t= 160;
+	// let i = 16.3;
 	
-	f1 = t.toString();
-	f2 = i.toString();
+	// f1 = t.toString();
+	// f2 = i.toString();
+	
+	httpRequest = new XMLHttpRequest();
+	
+	if (!httpRequest) {
+      alert('Giving up :( Cannot create an XMLHTTP instance');
+      return false;
+    }
 	
 	//urlWrite =  urlWriteThingViewInit.concat(WriteThingViewAPIKey,"&field1=",f1,"&field2=",f2);
 	urlWrite =  urlWriteThingViewInit.concat(WriteThingViewAPIKey,"&field1=",str);	
-	jQuery.getJSON(urlWrite);
+	//jQuery.getJSON(urlWrite);
+	
+	httpRequest.onreadystatechange = alertContents;
+    httpRequest.open('GET', urlWrite);
+    httpRequest.send();
+	
+	function alertContents() {
+		if (httpRequest.readyState === XMLHttpRequest.DONE) {
+			if (httpRequest.status === 200) {
+			//alert(httpRequest.responseText);
+			} else {
+			//alert('There was a problem with the request.');
+			}
+		}
+	}
+
+	delete httpRequest;
+	
+	
 	
 }
 
