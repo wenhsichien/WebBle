@@ -55,7 +55,8 @@ function updateThingView(str){
 		}
 	}
 
-	delete httpRequest;
+	//delete httpRequest;
+	httpRequest.delete;
 	
 	
 	

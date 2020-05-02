@@ -35,7 +35,7 @@ function ClrDisplay() {
 	initContent(window.term_.io);
 	
 	
-	updateThingView();
+	//updateThingView();
 }
 
 function connectionToggle() {
