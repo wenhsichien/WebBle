@@ -12,11 +12,11 @@ var fUploadThingViewToggle = false;
 function UploadThingViewToggle() {
 	if ( fUploadThingViewToggle ) {
 		fUploadThingViewToggle = false;
-        document.getElementById("clientUpLoadButton").innerHTML = "ThingView - Off";	
+        document.getElementById("clientUpdateServerButton").innerHTML = "ThingView - Off";	
 		window.term_.io.println('\r\n' + '关闭上传 ThingView');
 	} else {
 		fUploadThingViewToggle = true;
-        document.getElementById("clientUpLoadButton").innerHTML = "ThingView - On";
+        document.getElementById("clientUpdateServerButton").innerHTML = "ThingView - On";
 		window.term_.io.println('\r\n' + '开启上传 ThingView');		
 	}	
 	document.getElementById('terminal').focus();
