@@ -97,7 +97,7 @@ body {
   visibility: hidden;
 }
 .custom-file-input::before {
-  content: 'Select some files';
+  content: 'Select files 选取文件';
   color: black;
   display: inline-block;
   background: -webkit-linear-gradient(top, #f9f9f9, #e3e3e3);

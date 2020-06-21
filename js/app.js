@@ -11,6 +11,9 @@ var nusService;
 var rxCharacteristic;
 var txCharacteristic;
 var CheckSum;
+var rxMcuStr;
+
+
 
 var connected = false;
 var fTxEchoToggle = false;
@@ -157,8 +160,12 @@ function handleNotifications(event) {
     for (let i = 0; i < value.byteLength; i++) {
         str += String.fromCharCode(value.getUint8(i));
     }
-    window.term_.io.print(str);
 	
+
+	window.term_.io.print(str);
+
+	rxMcuStr = str;		// store it for upload_file.js
+
 	if ( fUploadThingViewToggle )
 		updateThingView(str);
 }
@@ -199,10 +206,10 @@ function sendNextChunk(a) {
 
 function initContent(io) {
     io.println("\r\n\
-欢迎来到 普立晶  BLE 串口终端机 V0.2.0 (06//2020)\r\n\
+欢迎来到 普立晶  BLE 串口终端机 V0.2.1 (06/21/2020)\r\n\
 Copyright (C) 2019  \r\n\
 \r\n\
-这是采用 Chrome 70+ 浏览器的  Web BLE 操作界面\r\n\
+这是采用 Chrome 70+ 浏览器的  Web BLE 操作界面, Baud rate = 9600\r\n\
 \r\n\
 *********************************************************\r\n\
 *********************************************************\r\n\
