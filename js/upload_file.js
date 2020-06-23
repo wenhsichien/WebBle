@@ -13,6 +13,7 @@ function UploadFile() {
 	var arr_sent = new Uint8Array(arr_sent_size);		
 	var SendDataState = 0;
 	var arr_ChecksumStr;	
+	var notify_frame_counter;
 	
 	var fr;
 	
@@ -75,6 +76,8 @@ function UploadFile() {
 			
 			SendDataState = 0;
 			
+			notify_frame_counter = 5;
+			
 			do 
 			{
 				
@@ -84,13 +87,14 @@ function UploadFile() {
 					
 						for (i=0; i < arr_sent_size; ++i )
 						{	
-							arr_sent[i] = 0x5A;							
+							arr_sent[i] = 0x00;							
 						}
 						
-						//arr_sent[0] = 0x5A;
-						//arr_sent[1] = 0x5A;	
-						//arr_sent[2] = 0x5A;	
-						//arr_sent[3] = 0x5A;	
+						arr_sent[0] = 0x5A;
+						arr_sent[1] = 0x5A;	
+						arr_sent[2] = 0x5A;	
+						arr_sent[3] = 0x5A;	
+						
 						
 						sendNextChunk(arr_sent);
 						
@@ -101,6 +105,12 @@ function UploadFile() {
 							if ( rxMcuStr == "RcvOK" )
 							break;
 							await sleep(100);
+							
+							if ( notify_frame_counter > 0 )
+							{	
+									sendNextChunk(arr_sent);	
+									notify_frame_counter--;
+							}
 					
 						} while ( ( (new Date).getTime() - start_time ) < 10000);	// 10 seconds		
 
