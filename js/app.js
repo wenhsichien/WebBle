@@ -115,7 +115,7 @@ function connect() {
         connected = true;
         //window.term_.io.println('\r\n' + bleDevice.name + ' Connected.');
         window.term_.io.println('\r\n' + bleDevice.name + ' 已连上.');
-        nusSendString('\r');
+        //nusSendString('\r');
         setConnButtonState(true);
     })
     .catch(error => {
@@ -206,7 +206,7 @@ function sendNextChunk(a) {
 
 function initContent(io) {
     io.println("\r\n\
-欢迎来到 普立晶  BLE 串口终端机 V0.2.4 (06/23/2020)\r\n\
+欢迎来到 普立晶  BLE 串口终端机 V0.2.5 (06/23/2020)\r\n\
 Copyright (C) 2019  \r\n\
 \r\n\
 这是采用 Chrome 70+ 浏览器的  Web BLE 操作界面, Baud rate = 9600\r\n\

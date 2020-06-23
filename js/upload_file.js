@@ -76,7 +76,7 @@ function UploadFile() {
 			
 			SendDataState = 0;
 			
-			notify_frame_counter = 5;
+			notify_frame_counter = 0;
 			
 			do 
 			{
@@ -149,12 +149,22 @@ function UploadFile() {
 							arr_sent[19 - tmp_index] = FileLengthStr.charCodeAt(n) -0x30;		// substract "0" = 0x30
 							tmp_index++;
 
-						}									
-						ChecksumStr=CheckSum.toString(16);						
-						arr_sent[20] = ChecksumStr.charCodeAt(0);
-						arr_sent[21] = ChecksumStr.charCodeAt(1);
-						arr_sent[22] = ChecksumStr.charCodeAt(2);
-						arr_sent[23] = ChecksumStr.charCodeAt(3);							
+						}					
+
+						for (i = 0; i < 4; ++i )
+							arr_sent[ 20 + i ] = 0x30;	
+						
+						ChecksumStr=CheckSum.toString(16);	
+
+						var aLength = ChecksumStr.length;
+						
+						for (i = 0; i < aLength; ++i)
+							arr_sent[23-i] = ChecksumStr.charCodeAt(aLength-1-i);	
+						
+						//arr_sent[20] = ChecksumStr.charCodeAt(0);
+						//arr_sent[21] = ChecksumStr.charCodeAt(1);
+						//arr_sent[22] = ChecksumStr.charCodeAt(2);
+						//arr_sent[23] = ChecksumStr.charCodeAt(3);							
 									
 						arr_CheckSum = 0;
 						
@@ -168,16 +178,28 @@ function UploadFile() {
 						for (i=0; i < buffer_length; ++i )
 						{	
 							arr_sent[i + first_block_head_length] = val_arr[i];
-							arr_CheckSum += val_arr[i];
+							
+						}
+						
+						for (i=8; i < 256; ++i )
+						{	
+							arr_CheckSum += arr_sent[i];
 							arr_CheckSum = arr_CheckSum & 0xffff;
 							
 						}
 				
+						for (i = 0; i < 4; ++i )
+							arr_sent[ 4 + i ] = 0x30;				
 						var arr_ChecksumStr = arr_CheckSum.toString(16);		
-						arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
-						arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
-						arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
-						arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
+						
+						var aLength = arr_ChecksumStr.length;
+						
+						for (i = 0; i < aLength; ++i)
+							arr_sent[7-i] = arr_ChecksumStr.charCodeAt(aLength-1-i);							
+						//arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
+						//arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
+						//arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
+						//arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
 
 						rxMcuStr = "";	
 						buffer_block_ptr = 0;
@@ -240,17 +262,23 @@ function UploadFile() {
 						for (i=0; i < buffer_length; ++i )
 						{	
 							arr_sent[i+second_block_head_length] = val_arr[ buffer_block_ptr * arr_sent_size_second_frame + arr_sent_size_first_frame +  i];
-							arr_CheckSum += arr_sent[i+4];
+							arr_CheckSum += arr_sent[i+second_block_head_length];
 							arr_CheckSum = arr_CheckSum & 0xffff;
 							
 						}
 
-				
-						var arr_ChecksumStr = arr_CheckSum.toString(16);		
-						arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
-						arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
-						arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
-						arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
+						for (i = 0; i < 4; ++i )
+							arr_sent[ 4 + i ] = 0x30;				
+						var arr_ChecksumStr = arr_CheckSum.toString(16);	
+						var aLength = arr_ChecksumStr.length;
+
+						for (i = 0; i < aLength; ++i)
+							arr_sent[7-i] = arr_ChecksumStr.charCodeAt(aLength-1-i);	
+						　
+						//arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
+						//arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
+						//arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
+						//arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
 
 						rxMcuStr = "";					
 						buffer_block_ptr++;
