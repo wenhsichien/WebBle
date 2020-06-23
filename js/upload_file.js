@@ -84,13 +84,13 @@ function UploadFile() {
 					
 						for (i=0; i < arr_sent_size; ++i )
 						{	
-							arr_sent[i] = 0;							
+							arr_sent[i] = 0x5A;							
 						}
 						
-						arr_sent[0] = 0x5A;
-						arr_sent[1] = 0x5A;	
-						arr_sent[2] = 0x5A;	
-						arr_sent[3] = 0x5A;	
+						//arr_sent[0] = 0x5A;
+						//arr_sent[1] = 0x5A;	
+						//arr_sent[2] = 0x5A;	
+						//arr_sent[3] = 0x5A;	
 						
 						sendNextChunk(arr_sent);
 						
