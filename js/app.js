@@ -206,7 +206,7 @@ function sendNextChunk(a) {
 
 function initContent(io) {
     io.println("\r\n\
-欢迎来到 普立晶  BLE 串口终端机 V0.2.5 (06/23/2020)\r\n\
+欢迎来到 曜璿東科技  BLE 串口终端机 V0.2.5 (06/23/2020)\r\n\
 Copyright (C) 2019  \r\n\
 \r\n\
 这是采用 Chrome 70+ 浏览器的  Web BLE 操作界面, Baud rate = 9600\r\n\
