@@ -5,7 +5,7 @@ function UploadFile() {
 
 	var FileLength;
 	var ChecksumStrLength = 12;
-	var arr_sent_size = 256;
+	var arr_sent_size = 258;
 	var first_block_head_length = 24;
 	var second_block_head_length = 8;	
 	var arr_sent_size_first_frame = 256 - first_block_head_length;	
@@ -14,6 +14,7 @@ function UploadFile() {
 	var SendDataState = 0;
 	var arr_ChecksumStr;	
 	var notify_frame_counter;
+	var frame_timeout_count = 0;
 	
 	var fr;
 	
@@ -77,6 +78,7 @@ function UploadFile() {
 			SendDataState = 0;
 			
 			notify_frame_counter = 0;
+			frame_timeout_count = 0;
 			
 			do 
 			{
@@ -90,11 +92,8 @@ function UploadFile() {
 							arr_sent[i] = 0x00;							
 						}
 						
-						arr_sent[0] = 0x5A;
-						arr_sent[1] = 0x5A;	
-						arr_sent[2] = 0x5A;	
-						arr_sent[3] = 0x5A;	
-						
+						arr_sent[0] = 0x55;
+						arr_sent[1] = 0xAA;	
 						
 						sendNextChunk(arr_sent);
 						
@@ -112,176 +111,84 @@ function UploadFile() {
 									notify_frame_counter--;
 							}
 					
-						} while ( ( (new Date).getTime() - start_time ) < 10000);	// 10 seconds		
+						} while ( ( (new Date).getTime() - start_time ) < 5000);	// 5 seconds	
 
 						if ( rxMcuStr == "RcvOK" ) 
 						{	
-							SendDataState = 1;
-							window.term_.io.println(' Notify Frame sent 通知帧');									
+							SendDataState = 2;
+							frame_timeout_count = 0;
+							window.term_.io.println(' Notify Frame sent 通知帧已發送接收成功');									
 						}
 						else
 						{	
-							SendDataState = 100;
-							remaining_length = 0;  // make it zero in order to exit do-while loop
-							rxMcuStr = "NotifyFrameTimeOut";
-							
+							if ( frame_timeout_count < 2 )
+							{
+									if ( frame_timeout_count == 0 )
+									{
+										window.term_.io.println(' 1st Notify frame time out !');	
+										frame_timeout_count++;
+									}
+									else if ( frame_timeout_count == 1 )
+									{
+										window.term_.io.println(' 2nd Notify frame time out !');	
+										frame_timeout_count++;
+									}									
+
+							}
+							else
+							{
+								SendDataState = 100;
+								remaining_length = 0;  // make it zero in order to exit do-while loop
+								rxMcuStr = "NotifyFrameTimeOut";
+							}
 						}
 					break;
 					
 					
 					case 1:		// Send first block
 					
-						for (i=0; i < arr_sent_size; ++i )
-						{	
-							arr_sent[i] = 0;							
-						}
-						
-						arr_sent[0] = 0x55;
-						arr_sent[1] = 0xAA;	
-						arr_sent[2] = 0x55;	
-						arr_sent[3] = 0xAA;	
-						
-						FileLengthStr=FileLength.toString();
-	
-						var tmp_index = 0;						
-						for (n = (FileLengthStr.length-1); n >= 0; --n) {
+
 					
-							arr_sent[19 - tmp_index] = FileLengthStr.charCodeAt(n) -0x30;		// substract "0" = 0x30
-							tmp_index++;
-
-						}					
-
-						for (i = 0; i < 4; ++i )
-							arr_sent[ 20 + i ] = 0x30;	
-						
-						ChecksumStr=CheckSum.toString(16);	
-
-						var aLength = ChecksumStr.length;
-						
-						for (i = 0; i < aLength; ++i)
-							arr_sent[23-i] = ChecksumStr.charCodeAt(aLength-1-i);	
-						
-						//arr_sent[20] = ChecksumStr.charCodeAt(0);
-						//arr_sent[21] = ChecksumStr.charCodeAt(1);
-						//arr_sent[22] = ChecksumStr.charCodeAt(2);
-						//arr_sent[23] = ChecksumStr.charCodeAt(3);							
-									
-						arr_CheckSum = 0;
-						
-						var buffer_length;
-						
-						if ( remaining_length > arr_sent_size_first_frame )
-							buffer_length　= arr_sent_size_first_frame;
-						else
-							buffer_length　= remaining_length;	
-						
-						for (i=0; i < buffer_length; ++i )
-						{	
-							arr_sent[i + first_block_head_length] = val_arr[i];
-							
-						}
-						
-						for (i=8; i < 256; ++i )
-						{	
-							arr_CheckSum += arr_sent[i];
-							arr_CheckSum = arr_CheckSum & 0xffff;
-							
-						}
-				
-						for (i = 0; i < 4; ++i )
-							arr_sent[ 4 + i ] = 0x30;				
-						var arr_ChecksumStr = arr_CheckSum.toString(16);		
-						
-						var aLength = arr_ChecksumStr.length;
-						
-						for (i = 0; i < aLength; ++i)
-							arr_sent[7-i] = arr_ChecksumStr.charCodeAt(aLength-1-i);							
-						//arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
-						//arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
-						//arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
-						//arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
-
-						rxMcuStr = "";	
-						buffer_block_ptr = 0;
-						sendNextChunk(arr_sent);
-						var start_time = (new Date).getTime();						
-						do
-						{
-							if ( rxMcuStr == "RcvOK" )
-								break;
-							await sleep(100);
-					
-						} while ( ( (new Date).getTime() - start_time ) < 10000);	// 10 seconds			
-
-
-						if ( rxMcuStr != "RcvOK" ) 
-						{	
-							SendDataState = 100;
-							remaining_length = 0;  // make it zero in order to exit do-while loop
-							rxMcuStr = "1stFrameTimeOut";
-							break;			
-						}
-						else
-							window.term_.io.println(' 1st Frame sent 第一帧');							
-						
-						if ( remaining_length > arr_sent_size_first_frame )
-						{	
-							remaining_length = remaining_length - arr_sent_size_first_frame;
-							SendDataState = 2;
-				
-						}
-						else
-						{	
-							remaining_length = 0;
-							SendDataState = 2;	// this statement is meangless
-						}	
 					break;
-					
-					
 					case 2:		// Send remaining blocks
+						// clear 256 sending buffers
 						for (i=0; i < arr_sent_size; ++i )
 						{	
 							arr_sent[i] = 0;							
 						}
 						
-						arr_sent[0] = 0x55;
-						arr_sent[1] = 0xBB;	
-						arr_sent[2] = 0x55;	
-						arr_sent[3] = 0xBB;	
-						
-						arr_CheckSum = 0;
-						
 						var buffer_length;
-
-						if ( remaining_length > arr_sent_size_second_frame )						
-							buffer_length　= arr_sent_size_second_frame;
-						else
-							buffer_length　= remaining_length;							
 						
-
+						if ( remaining_length > 256 )
+						{
+							arr_sent[0] = 0xff;
+							buffer_length = 256;
+						}	
+						else
+						{
+							arr_sent[0] = remaining_length-1;
+							buffer_length = remaining_length;
+						
+						}
+													
+						// fill buffer data 
 						for (i=0; i < buffer_length; ++i )
 						{	
-							arr_sent[i+second_block_head_length] = val_arr[ buffer_block_ptr * arr_sent_size_second_frame + arr_sent_size_first_frame +  i];
-							arr_CheckSum += arr_sent[i+second_block_head_length];
-							arr_CheckSum = arr_CheckSum & 0xffff;
-							
+							arr_sent[i+2] = val_arr[ buffer_block_ptr * 256 + i];
 						}
+						
+						
+						arr_CheckSum = 0;	
+						for (i=0; i < 256; ++i )
+						{	
+							arr_CheckSum += arr_sent[i+2];
+							arr_CheckSum = arr_CheckSum & 0xff;
+						}						
 
-						for (i = 0; i < 4; ++i )
-							arr_sent[ 4 + i ] = 0x30;				
-						var arr_ChecksumStr = arr_CheckSum.toString(16);	
-						var aLength = arr_ChecksumStr.length;
+						arr_sent[1] = arr_CheckSum;
 
-						for (i = 0; i < aLength; ++i)
-							arr_sent[7-i] = arr_ChecksumStr.charCodeAt(aLength-1-i);	
-						　
-						//arr_sent[4] = arr_ChecksumStr.charCodeAt(0);
-						//arr_sent[5] = arr_ChecksumStr.charCodeAt(1);	
-						//arr_sent[6] = arr_ChecksumStr.charCodeAt(2);		
-						//arr_sent[7] = arr_ChecksumStr.charCodeAt(3);						
 
 						rxMcuStr = "";					
-						buffer_block_ptr++;
 						sendNextChunk(arr_sent);
 						var start_time = (new Date).getTime();						
 						do
@@ -290,29 +197,46 @@ function UploadFile() {
 								break;
 							await sleep(100);
 					
-						} while ( ( (new Date).getTime() - start_time ) < 10000);	// 10 seconds							
+						} while ( ( (new Date).getTime() - start_time ) < 5000);	// 5 seconds							
 						
 						if ( rxMcuStr != "RcvOK" ) 
 						{	
-							SendDataState = 100;
-							remaining_length = 0;  // make it zero in order to exit do-while loop
-							rxMcuStr = "FrameTimeOut";
-							break;			
+							if ( frame_timeout_count < 2 )
+							{
+									if ( frame_timeout_count == 0 )
+									{
+										window.term_.io.println(' 1st Notify frame time out !');	
+										frame_timeout_count++;
+									}
+									else if ( frame_timeout_count == 1 )
+									{
+										window.term_.io.println(' 2nd Notify frame time out !');	
+										frame_timeout_count++;
+									}									
+							}
+							else
+							{
+								SendDataState = 100;
+								remaining_length = 0;  // make it zero in order to exit do-while loop
+								rxMcuStr = "FrameTimeOut";
+								break;			
+							}
 						}	
-						else
+						else // 成功發出，進行 next  frame
+						{
 							window.term_.io.println(' Frame : ' + (buffer_block_ptr+1) + ' sent');		
+							buffer_block_ptr++;
+							frame_timeout_count = 0;
+							
+							if ( remaining_length > 256 )
+							{
+								remaining_length = remaining_length - 256;
+								SendDataState = 2;
+							}
+							else
+								remaining_length = 0;
+						}
 
-						if ( remaining_length > arr_sent_size_second_frame )
-						{	
-							remaining_length = remaining_length - arr_sent_size_second_frame;
-							SendDataState = 2;
-				
-						}
-						else
-						{	
-							remaining_length = 0;
-							SendDataState = 2;	// this statement is meangless
-						}
 						
 					break;
 				
@@ -324,9 +248,7 @@ function UploadFile() {
 			}	while ( remaining_length > 0 )
 			
 			if ( rxMcuStr == "NotifyFrameTimeOut" )
-				window.term_.io.println('Notify frame time out !');
-			else if ( rxMcuStr == "1stFrameTimeOut") 
-				window.term_.io.println('1st frame time out !');	
+				window.term_.io.println('Notify frame time out !');	
 			else if ( rxMcuStr == "FrameTimeOut")
 				window.term_.io.println('frame frameout !');				
 			else if (rxMcuStr == "RcvOK")   
