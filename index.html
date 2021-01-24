@@ -17,10 +17,21 @@
 
     <body>
         <div id="connection-panel">
-            <button id="clientConnectButton" type="button" class="btn btn-default" onclick="connectionToggle()">连接 Connect</button>
-			<button id="clientDisplayButton" type="button" class="btn btn-default" onclick="TxEchoToggle()">开启输入显示 Echo On</button>
-			<button id="clientClrScreenButton" type="button" class="btn btn-default" onclick="ClrDisplay()">清除显示 Clear Display</button>	
+            <button id="clientConnectButton" type="button" class="btn btn-default" onclick="connectionToggle()">連接 Connect</button>
+			<button id="clientDisplayButton" type="button" class="btn btn-default" onclick="TxEchoToggle()">開啟輸入顯示 Echo On</button>
+			<button id="clientClrScreenButton" type="button" class="btn btn-default" onclick="ClrDisplay()">清除顯示 Clr Display</button>	
+			<!-- <button id="clientDigitalDisplayButton" type="button" class="btn btn-default" onclick="ToggleDisplay()">十六位顯示 Hex</button>		-->
+			<button id="clientDigitalDisplayButton" type="button" class="btn btn-default" onclick="ToggleCharDisplay()">ASCII 顯示</button>		
 			<button id="clientUpdateServerButton" type="button" class="btn btn-default" onchange="UploadThingViewToggle()">ThingView - Off</button>	
+			
+            <button id="ListenModBus" type="button" class="btn btn-default" onclick="enable_listen_modbus()">啟動監聽 ModBus</button>				
+            <button id="BusVoltage" type="button" class="btn btn-default" onclick="">輸入電壓 = </button>		
+            <button id="BusCurrent" type="button" class="btn btn-default" onclick="">輸入電流 = </button>	
+			<button id="BusWatt" type="button" class="btn btn-default" onclick="">瓦數 = </button>	
+			<button id="RPM" type="button" class="btn btn-default" onclick="">轉數 = </button>	
+			<button id="CodeVersion" type="button" class="btn btn-default" onclick="">版本 = </button>				
+			
+			
 			<p align = "right">
 				<input id="UploadFile" type="file" class="custom-file-input" onchange="UploadFile()">				
 			</p>

@@ -17,6 +17,29 @@ var rxMcuStr;
 
 var connected = false;
 var fTxEchoToggle = false;
+var ASCII_Display = true;
+var fEnableListenModBus = false;
+
+
+function ToggleCharDisplay(){
+	
+	if ( ASCII_Display ) {
+		ASCII_Display = false;
+        document.getElementById("clientDigitalDisplayButton").innerHTML = "十六位顯示";	
+		//window.term_.io.println('\r\n' + 'Echo Off');
+	} else {
+		
+		if ( fEnableListenModBus == false )			// 在 listen to modebus 狀態下,不允許切回去 ASCII display
+		{
+			ASCII_Display = true;
+			document.getElementById("clientDigitalDisplayButton").innerHTML = "ASCII 顯示";
+		//window.term_.io.println('\r\n' + 'Echo On');		
+		}
+	}	
+	document.getElementById('terminal').focus();
+	
+}
+
 
 function TxEchoToggle() {
 	if ( fTxEchoToggle ) {
@@ -50,6 +73,106 @@ function connectionToggle() {
     }
     document.getElementById('terminal').focus();
 }
+
+
+//Modbus 相關 functions
+
+
+function enable_listen_modbus(){
+	if ( fEnableListenModBus == false )
+	{
+		
+		if ( ASCII_Display == true )
+			ToggleCharDisplay();		
+		fEnableListenModBus = true;
+		document.getElementById("ListenModBus").innerHTML = "關閉監聽 ModBus";	
+
+		
+	}
+	else
+	{
+		fEnableListenModBus = false;
+		document.getElementById("ListenModBus").innerHTML = "啟動監聽 ModBus";			
+	}
+	
+}
+
+
+var modbus_length = 8;		// 包含 2-byte CRC
+var modbus_length_data = modbus_length - 2;
+let id_read_command = 0x03;
+let id_write_command = 0x06;
+let id_echo_command = 0x08;
+
+var modbus_tx_data_array = new Uint8Array(modbus_length);	
+var modbus_rx_data_array = new Uint8Array(modbus_length);	
+
+function process_modbus_command()
+{
+	if ( modbus_rx_data_array[1] == id_read_command  )
+	{
+		window.term_.io.print("\r\nRead Command\r\n");
+		process_modbus_command_read();		
+	}
+	else if ( modbus_rx_data_array[1] == id_write_command )
+	{
+		window.term_.io.print("\r\nWrite Command\r\n");
+		process_modbus_command_write();
+	}
+	else if ( modbus_rx_data_array[1] == id_echo_command )
+	{
+		window.term_.io.print("\r\nEcho Command\r\n");
+		for ( let i = 0; i < modbus_length_data ; i++ )
+			modbus_tx_data_array[i] = modbus_rx_data_array[i];
+		generate_crc(modbus_length_data);
+		sendNextChunk(modbus_tx_data_array);
+	}
+	else
+		window.term_.io.print("\r\nUnknown Command\r\n");	
+	
+}	
+
+function process_modbus_command_write(){
+	
+
+		
+}
+
+function process_modbus_command_read(){
+	
+
+		
+}
+
+function generate_crc(mod_length)
+{
+	var rtucrc = 0xFFFF;
+	
+	if ( mod_length > 0 )
+	{
+		for ( var index_byte = 0; index_byte < mod_length; index_byte++)
+		{
+			rtucrc = rtucrc^modbus_tx_data_array[index_byte];
+			for ( var index_bit = 0; index_bit <= 7; index_bit++) {
+				if ((rtucrc & 0x0001) != 0) {
+					rtucrc = (rtucrc>>1) ^ 0xA001;
+				} else {
+					rtucrc = rtucrc >> 1;
+				}
+			}
+			
+		}
+		modbus_tx_data_array[mod_length+1] = ( rtucrc >> 8 ) & 0xff;	
+		modbus_tx_data_array[mod_length] = ( rtucrc ) & 0xff;	
+	}
+}
+
+
+///////// End - Modbus 相關 functions ////////////////////////
+
+
+
+
 
 // Sets button to either Connect or Disconnect
 function setConnButtonState(enabled) {
@@ -157,9 +280,46 @@ function handleNotifications(event) {
     // Convert raw data bytes to character values and use these to 
     // construct a string.
     let str = "";
-    for (let i = 0; i < value.byteLength; i++) {
-        str += String.fromCharCode(value.getUint8(i));
-    }
+	
+	if ( ASCII_Display )
+	{
+		for (let i = 0; i < value.byteLength; i++) {
+			str += String.fromCharCode(value.getUint8(i));
+		}
+	}
+	else
+	{
+		if ( fEnableListenModBus == true )
+		{
+			if ( value.byteLength <= modbus_length )
+			{
+				for (let i = 0; i < value.byteLength; i++) {
+					modbus_rx_data_array[i] = value.getUint8(i);
+				}	
+				process_modbus_command();
+			}
+			else
+				window.term_.io.println('\r\nModbus length is not macthed\r\n');
+		}
+		
+		const chars = new Uint8Array(value.byteLength * 2 + value.byteLength);
+		const alpha = 'a'.charCodeAt(0) - 10;
+		const digit = '0'.charCodeAt(0);
+		
+		let p = 0;
+		for (let i = 0; i < value.byteLength; i++) {
+			
+			let nibble = value.getUint8(i) >>> 4;
+			chars[p++] = nibble > 9 ? nibble + alpha : nibble + digit;
+			nibble = value.getUint8(i) & 0xF;
+			chars[p++] = nibble > 9 ? nibble + alpha : nibble + digit;   		
+			
+			chars[p++]=0x20;
+		}	
+		str = String.fromCharCode.apply(null, chars);
+				
+		
+	}
 	
 
 	window.term_.io.print(str);
@@ -206,7 +366,7 @@ function sendNextChunk(a) {
 
 function initContent(io) {
     io.println("\r\n\
-欢迎来到 曜璿東科技  BLE 串口终端机 V0.2.7 (12/25/2020)\r\n\
+欢迎来到 曜璿東科技  BLE 串口终端机 V0.2.8 (01/24/2021)\r\n\
 Copyright (C) 2019  \r\n\
 \r\n\
 这是采用 Chrome 70+ 浏览器的  Web BLE 操作界面, Baud rate = 9600\r\n\
